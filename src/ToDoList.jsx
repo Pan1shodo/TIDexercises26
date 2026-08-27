@@ -11,7 +11,7 @@ export default function ToDoList({ firstName, lastName, todos, onAdd }) {
           <ToDoItem key={index} text={text} />
         ))}
       </ul>
-      <button onClick={handleAdd}>Create new task</button>
+      <button onClick={onAdd}>Create new task</button>
     </>
   );
 }
