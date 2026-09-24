@@ -1,30 +1,31 @@
 import "./App.css";
-import { useState } from "react";
 import ToDoList from "./ToDoList.jsx";
-import ToDoPanel from "./ToDoPanel.jsx";
+import AuthPage from "./AuthPage.jsx";
+import Parse from "parse";
+import AppID from "./keys.json";
+import JSkey from "./keys.json";
+import ParseServerURL from "./keys.json";
+import { useAuthStore } from "./store/UseAuthStore.js";
+
+Parse.initialize(AppID, JSkey);
+Parse.serverURL = ParseServerURL;
 
 function App() {
-  const [list1, setList1] = useState(["Eat the lolly", "Sip the juice"]);
-  const [list2, setList2] = useState(["Drink the child", "Become satan"]);
+  const user = useAuthStore((state) => state.user);
+  const setUser = useAuthStore.setState;
 
-  const addTo1 = () => setList1((prev) => [...prev, `Task ${prev.length + 1}`]);
-  const addTo2 = () => setList2((prev) => [...prev, `Task ${prev.length + 1}`]);
+  function handleAuthenticated(loggedInUser) {
+    setUser({ user: loggedInUser });
+  }
+
+  if (!user) {
+    return <AuthPage onAuthenticated={handleAuthenticated} />;
+  }
 
   return (
-    <ToDoPanel firstName="Victor" lastName="...">
-      <ToDoList
-        firstName="Victor"
-        lastName="..."
-        todos={list1}
-        onAdd={addTo1}
-      />
-      <ToDoList
-        firstName="Victor"
-        lastName="..."
-        todos={list2}
-        onAdd={addTo2}
-      />
-    </ToDoPanel>
+    <div className="main-inner">
+      <ToDoList listTitle={"My Todo List"} />
+    </div>
   );
 }
 

@@ -1,17 +1,58 @@
+import { useState, useEffect } from "react";
+import NewTodoForm from "./NewTodoForm";
 import ToDoItem from "./ToDoItem";
+import {
+  fetchTodos,
+  createTodo,
+  setTodoDone,
+  deleteTodo,
+} from "./services/todoService";
 
-export default function ToDoList({ firstName, lastName, todos, onAdd }) {
+export default function ToDoList({ listTitle }) {
+  const [todoList, setTodoList] = useState([]);
+
+  useEffect(() => {
+    async function load() {
+      setTodoList(await fetchTodos());
+    }
+    load();
+  }, []);
+
+  async function handleAdd(text) {
+    const newToDo = await createTodo(text);
+    setTodoList([...todoList, newToDo]);
+  }
+  async function handleToggle(id) {
+    const todo = todoList.find((t) => t.id === id);
+    await setTodoDone(id, !todo.done);
+    setTodoList(
+      todoList.map((t) => (t.id === id ? { ...t, done: !t.done } : t)),
+    );
+  }
+  async function handleRemove(idToDelete) {
+    await deleteTodo(idToDelete);
+    setTodoList(todoList.filter((todo) => todo.id !== idToDelete));
+  }
+
   return (
-    <>
-      <h2>
-        {firstName} {lastName}'s To Do List
-      </h2>
-      <ul>
-        {todos.map((text, index) => (
-          <ToDoItem key={index} text={text} />
-        ))}
-      </ul>
-      <button onClick={onAdd}>Create new task</button>
-    </>
+    <div className="todo-body">
+      <h1>{listTitle}</h1>
+
+      <NewTodoForm onAdd={handleAdd} />
+      {todoList.length === 0 ? (
+        <p>Nothing to do. Enjoy your day!</p>
+      ) : (
+        <ul>
+          {todoList.map((todo) => (
+            <ToDoItem
+              key={todo.id}
+              todo={todo}
+              onToggle={handleToggle}
+              onRemove={handleRemove}
+            />
+          ))}
+        </ul>
+      )}
+    </div>
   );
 }
