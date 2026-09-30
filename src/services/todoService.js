@@ -1,17 +1,35 @@
 import Parse from "parse";
 
-const TodoItem = Parse.Object.extend();
-const newItem = new TodoItem();
+const TodoItem = Parse.Object.extend("TodoItem");
 
-newItem.set("text", "Eat the pudding");
-newItem.set("done", false);
-
-newItem.save().then(onSuccessfulSave).catch(onError);
-
-function onSuccessfulSave(savedItem) {
-  alert("saved a todo with id: " + savedItem.id);
+function toPlainObject(parseObject) {
+  return {
+    id: parseObject.id,
+    text: parseObject.get("text"),
+    done: parseObject.get("done"),
+  };
 }
 
-function onError(error) {
-  alert(error.message);
+export async function fetchTodos() {
+  const query = new Parse.Query(TodoItem);
+  query.ascending("createdAt");
+  const result = await query.find();
+  return result.map(toPlainObject);
+}
+
+export async function createTodo(text) {
+  const item = new TodoItem();
+  item.set("text", text);
+  item.set("done", false);
+  return toPlainObject(await item.save());
+}
+
+export async function setTodoDone(id, done) {
+  const item = TodoItem.createWithoutData(id);
+  item.set("done", done);
+  return toPlainObject(await item.save());
+}
+export async function deleteTodo(id) {
+  const item = TodoItem.createWithoutData(id);
+  await item.destroy();
 }
