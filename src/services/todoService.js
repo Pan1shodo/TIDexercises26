@@ -21,6 +21,7 @@ export async function createTodo(text) {
   const item = new TodoItem();
   item.set("text", text);
   item.set("done", false);
+  item.setACL(new Parse.ACL(Parse.User.current())); // owner-only read/write
   return toPlainObject(await item.save());
 }
 
